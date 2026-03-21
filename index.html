@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <title>MS-Stempelhamster</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app" id="app">
+
+        <!-- Header -->
+        <header class="header">
+            <button class="header-btn header-btn-left" id="header-back-btn" style="display:none;" aria-label="Zurück">&#8592;</button>
+            <h1>MS-Stempelhamster</h1>
+            <button class="header-btn header-btn-right" id="header-settings-btn" aria-label="Einstellungen">&#9881;</button>
+        </header>
+
+        <!-- ====== SETUP SCREEN ====== -->
+        <div class="screen setup-screen" id="screen-setup">
+            <div id="setup-step-1">
+                <div class="setup-title">Willkommen!</div>
+                <div class="setup-subtitle">Richte MS-Stempelhamster für dich ein.</div>
+                <button class="btn btn-primary" id="setup-next-1">Weiter</button>
+            </div>
+            <div id="setup-step-2" style="display:none;">
+                <div class="setup-title">Sollarbeitszeit</div>
+                <div class="setup-subtitle">Wie viele Stunden pro Tag sollst du arbeiten?</div>
+                <div class="setup-form" id="setup-target-form">
+                    <div class="form-row"><span class="form-row-label">Montag</span><input class="form-input" type="text" value="08:00" data-day="mon"></div>
+                    <div class="form-row"><span class="form-row-label">Dienstag</span><input class="form-input" type="text" value="08:00" data-day="tue"></div>
+                    <div class="form-row"><span class="form-row-label">Mittwoch</span><input class="form-input" type="text" value="08:00" data-day="wed"></div>
+                    <div class="form-row"><span class="form-row-label">Donnerstag</span><input class="form-input" type="text" value="08:00" data-day="thu"></div>
+                    <div class="form-row"><span class="form-row-label">Freitag</span><input class="form-input" type="text" value="08:00" data-day="fri"></div>
+                    <div class="form-row"><span class="form-row-label">Samstag</span><input class="form-input" type="text" value="00:00" data-day="sat"></div>
+                    <div class="form-row"><span class="form-row-label">Sonntag</span><input class="form-input" type="text" value="00:00" data-day="sun"></div>
+                </div>
+                <button class="btn btn-primary mt-lg" id="setup-next-2">Weiter</button>
+            </div>
+            <div id="setup-step-3" style="display:none;">
+                <div class="setup-title">Startsaldo</div>
+                <div class="setup-subtitle">Hast du bereits Plus- oder Minusstunden?<br>Beispiel: +12:30 oder -03:45 oder 00:00</div>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label class="form-label">Aktuelles Stundensaldo</label>
+                        <input class="form-input" type="text" id="setup-balance" value="00:00" placeholder="+00:00">
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-lg" id="setup-finish">Los geht's!</button>
+            </div>
+        </div>
+
+        <!-- ====== HEUTE SCREEN ====== -->
+        <div class="screen" id="screen-today">
+            <!-- Datum & Tagestyp -->
+            <div class="date-display">
+                <div class="day-name" id="today-dayname"></div>
+                <div class="date-full" id="today-date"></div>
+            </div>
+            <div class="daytype-select">
+                <select id="today-daytype">
+                    <option value="workday">Arbeitstag</option>
+                    <option value="vacation">Urlaub</option>
+                    <option value="sick">Krankheit</option>
+                    <option value="holiday">Feiertag</option>
+                    <option value="free">Frei / Ausgleich</option>
+                    <option value="weekend">Wochenende</option>
+                </select>
+                <span class="status-badge" id="today-status"></span>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer-display idle" id="timer-display">
+                <div class="timer-time" id="timer-time">00:00:00</div>
+                <div class="timer-label" id="timer-label">Bereit</div>
+            </div>
+
+            <!-- Hauptbuttons -->
+            <div class="main-buttons">
+                <button class="btn btn-start" id="btn-stamp">&#9654; Stempeln</button>
+                <div class="btn-row">
+                    <button class="btn btn-pause" id="btn-pause" disabled>&#9208; Pause</button>
+                    <button class="btn btn-secondary btn-small" id="btn-standard-pause">Standardpause</button>
+                </div>
+                <button class="btn btn-secondary btn-small" id="btn-no-pause">Keine Pause heute</button>
+            </div>
+
+            <!-- Heutige Blöcke -->
+            <div class="card">
+                <div class="card-title">Heutige Blöcke</div>
+                <ul class="block-list" id="today-blocks">
+                    <li class="block-item" style="color:var(--color-text-muted); justify-content:center;">Noch keine Einträge</li>
+                </ul>
+            </div>
+
+            <!-- Tageszusammenfassung -->
+            <div class="card">
+                <div class="card-title">Tageszusammenfassung</div>
+                <div class="day-summary">
+                    <div class="day-summary-item">
+                        <span class="day-summary-label">Arbeitszeit</span>
+                        <span class="day-summary-value" id="today-work">00:00</span>
+                    </div>
+                    <div class="day-summary-item">
+                        <span class="day-summary-label">Pause</span>
+                        <span class="day-summary-value" id="today-pause">00:00</span>
+                    </div>
+                    <div class="day-summary-item">
+                        <span class="day-summary-label">Soll</span>
+                        <span class="day-summary-value" id="today-target">08:00</span>
+                    </div>
+                    <div class="day-summary-item">
+                        <span class="day-summary-label">Saldo heute</span>
+                        <span class="day-summary-value" id="today-balance">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gesamtsaldo -->
+            <div class="card total-balance">
+                <div class="total-balance-label">Gesamtsaldo</div>
+                <div class="total-balance-value" id="today-total-balance">+00:00</div>
+            </div>
+        </div>
+
+        <!-- ====== WOCHEN SCREEN ====== -->
+        <div class="screen" id="screen-week">
+            <div class="overview-nav">
+                <button class="overview-nav-btn" id="week-prev">&#8592;</button>
+                <span class="overview-nav-title" id="week-title">KW 12</span>
+                <button class="overview-nav-btn" id="week-next">&#8594;</button>
+            </div>
+            <div class="card" style="padding:0; overflow-x:auto;">
+                <table class="overview-table" id="week-table">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Typ</th>
+                            <th>Soll</th>
+                            <th>Ist</th>
+                            <th>Pause</th>
+                            <th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="week-body"></tbody>
+                </table>
+            </div>
+            <div class="card total-balance">
+                <div class="total-balance-label">Gesamtsaldo</div>
+                <div class="total-balance-value" id="week-total-balance">+00:00</div>
+            </div>
+        </div>
+
+        <!-- ====== MONATS SCREEN ====== -->
+        <div class="screen" id="screen-month">
+            <div class="overview-nav">
+                <button class="overview-nav-btn" id="month-prev">&#8592;</button>
+                <span class="overview-nav-title" id="month-title">März 2026</span>
+                <button class="overview-nav-btn" id="month-next">&#8594;</button>
+            </div>
+            <div class="card" style="padding:0; overflow-x:auto;">
+                <table class="overview-table" id="month-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Typ</th>
+                            <th>Soll</th>
+                            <th>Ist</th>
+                            <th>Pause</th>
+                            <th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="month-body"></tbody>
+                </table>
+            </div>
+            <div class="card total-balance">
+                <div class="total-balance-label">Gesamtsaldo</div>
+                <div class="total-balance-value" id="month-total-balance">+00:00</div>
+            </div>
+        </div>
+
+        <!-- ====== EXPORT SCREEN ====== -->
+        <div class="screen" id="screen-export">
+            <div class="card">
+                <div class="card-title">Zeitraum wählen</div>
+                <div class="form-group">
+                    <label class="form-label">Von</label>
+                    <input class="form-input" type="date" id="export-from">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bis</label>
+                    <input class="form-input" type="date" id="export-to">
+                </div>
+            </div>
+            <div class="export-option">
+                <div class="export-option-info">
+                    <h3>CSV-Export</h3>
+                    <p>Tabellendaten für Excel</p>
+                </div>
+                <button class="btn btn-primary btn-small" id="btn-export-csv">Exportieren</button>
+            </div>
+            <div class="export-option">
+                <div class="export-option-info">
+                    <h3>PDF-Export</h3>
+                    <p>Druckfertige Übersicht</p>
+                </div>
+                <button class="btn btn-primary btn-small" id="btn-export-pdf">Exportieren</button>
+            </div>
+        </div>
+
+        <!-- ====== EINSTELLUNGEN SCREEN ====== -->
+        <div class="screen" id="screen-settings">
+            <div class="card">
+                <div class="settings-section">
+                    <div class="settings-section-title">Sollarbeitszeit pro Tag</div>
+                    <div id="settings-target-form">
+                        <div class="form-row"><span class="form-row-label">Montag</span><input class="form-input" type="text" data-day="mon"></div>
+                        <div class="form-row"><span class="form-row-label">Dienstag</span><input class="form-input" type="text" data-day="tue"></div>
+                        <div class="form-row"><span class="form-row-label">Mittwoch</span><input class="form-input" type="text" data-day="wed"></div>
+                        <div class="form-row"><span class="form-row-label">Donnerstag</span><input class="form-input" type="text" data-day="thu"></div>
+                        <div class="form-row"><span class="form-row-label">Freitag</span><input class="form-input" type="text" data-day="fri"></div>
+                        <div class="form-row"><span class="form-row-label">Samstag</span><input class="form-input" type="text" data-day="sat"></div>
+                        <div class="form-row"><span class="form-row-label">Sonntag</span><input class="form-input" type="text" data-day="sun"></div>
+                    </div>
+                    <button class="btn btn-primary btn-small mt-md" id="btn-save-target">Speichern</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="settings-section">
+                    <div class="settings-section-title">Startsaldo</div>
+                    <div class="form-group">
+                        <label class="form-label">Aktuelles Startsaldo</label>
+                        <input class="form-input" type="text" id="settings-balance" placeholder="+00:00">
+                    </div>
+                    <button class="btn btn-primary btn-small" id="btn-save-balance">Speichern</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="settings-section">
+                    <div class="settings-section-title">Daten</div>
+                    <button class="btn btn-secondary btn-small mb-sm" id="btn-backup" style="width:100%;">Backup erstellen (JSON)</button>
+                    <button class="btn btn-secondary btn-small" id="btn-restore" style="width:100%;">Backup wiederherstellen</button>
+                    <input type="file" id="restore-file" accept=".json" style="display:none;">
+                </div>
+            </div>
+            <div class="card">
+                <div class="settings-section">
+                    <div class="settings-section-title" style="color:var(--color-danger);">Zurücksetzen</div>
+                    <p style="font-size:var(--font-size-sm); color:var(--color-text-light); margin-bottom:var(--space-md);">Alle erfassten Zeiten, Tage und Einstellungen werden unwiderruflich gelöscht. Die App startet danach neu wie beim ersten Mal.</p>
+                    <button class="btn btn-small mb-sm" id="btn-reset" style="width:100%; background:var(--color-danger); color:white;">Alle Daten zurücksetzen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== KORREKTUR SCREEN ====== -->
+        <div class="screen" id="screen-correction">
+            <div class="date-display">
+                <div class="day-name" id="correction-dayname"></div>
+                <div class="date-full" id="correction-date"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Tagestyp</div>
+                <select class="form-input" id="correction-daytype" style="width:100%;">
+                    <option value="workday">Arbeitstag</option>
+                    <option value="vacation">Urlaub</option>
+                    <option value="sick">Krankheit</option>
+                    <option value="holiday">Feiertag</option>
+                    <option value="free">Frei / Ausgleich</option>
+                    <option value="weekend">Wochenende</option>
+                </select>
+            </div>
+            <div class="card">
+                <div class="card-title">Sollzeit</div>
+                <input class="form-input" type="text" id="correction-target" style="width:100px;">
+            </div>
+            <div class="card">
+                <div class="card-title">Arbeitsblöcke</div>
+                <div id="correction-work-blocks"></div>
+                <button class="btn btn-secondary btn-small mt-sm" id="btn-add-work">+ Arbeitsblock</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Pausenblöcke</div>
+                <div id="correction-pause-blocks"></div>
+                <button class="btn btn-secondary btn-small mt-sm" id="btn-add-pause">+ Pausenblock</button>
+            </div>
+            <div class="card">
+                <div class="form-row">
+                    <span class="form-row-label">Keine Pause heute</span>
+                    <input type="checkbox" id="correction-no-pause">
+                </div>
+            </div>
+            <button class="btn btn-primary mt-md" id="btn-save-correction" style="width:100%;">Speichern</button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="bottom-nav-inner">
+                <button class="nav-item active" data-screen="today">
+                    <span class="nav-icon">&#128197;</span>
+                    Heute
+                </button>
+                <button class="nav-item" data-screen="week">
+                    <span class="nav-icon">&#128200;</span>
+                    Woche
+                </button>
+                <button class="nav-item" data-screen="month">
+                    <span class="nav-icon">&#128198;</span>
+                    Monat
+                </button>
+                <button class="nav-item" data-screen="export">
+                    <span class="nav-icon">&#128190;</span>
+                    Export
+                </button>
+            </div>
+        </nav>
+
+        <!-- Modal für Block-Bearbeitung -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal" id="modal">
+                <div class="modal-title" id="modal-title">Block bearbeiten</div>
+                <div id="modal-content"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="modal-cancel">Abbrechen</button>
+                    <button class="btn btn-primary" id="modal-save">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries (lokal für Offline) -->
+    <script src="lib/dexie.min.js"></script>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- App-Module -->
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/daytype.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/corrections.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/views.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
