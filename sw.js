@@ -3,7 +3,7 @@
  * Cache-First Strategie für vollständige Offline-Fähigkeit
  */
 
-var CACHE_NAME = 'stempelhamster-v4';
+var CACHE_NAME = 'stempelhamster-v5';
 
 var PRECACHE_URLS = [
     './',

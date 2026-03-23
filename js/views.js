@@ -40,8 +40,9 @@ SH.views = {
             }
 
             // Tageszusammenfassung
-            document.getElementById('today-work').textContent = u.minutesToHHMM(totals.netWorkMinutes);
+            document.getElementById('today-gross').textContent = u.minutesToHHMM(totals.grossMinutes);
             document.getElementById('today-pause').textContent = u.minutesToHHMM(totals.pauseMinutes);
+            document.getElementById('today-work').textContent = u.minutesToHHMM(totals.netWorkMinutes);
             document.getElementById('today-target').textContent = u.minutesToHHMM(totals.targetMinutes);
 
             var balanceEl = document.getElementById('today-balance');

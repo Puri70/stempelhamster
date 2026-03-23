@@ -55,18 +55,18 @@ SH.calculator = {
                 }
             }
 
-            // Netto-Arbeitszeit
-            // Wenn manuelle Pausen existieren, sind die Arbeitsblöcke schon "netto"
-            // (der Timer stoppt den Arbeitsblock bei Pausenstart).
-            // Nur bei Standardpause muss abgezogen werden.
-            var netWorkMinutes;
-            if (standardPauseApplied) {
-                netWorkMinutes = Math.max(0, workMinutes - pauseMinutes);
-            } else if (hasPauseBlocks) {
-                netWorkMinutes = workMinutes;
+            // Brutto-Anwesenheitszeit (Arbeit + Pausen zusammen)
+            var grossMinutes;
+            if (hasPauseBlocks) {
+                // Bei manuellen Pausen: Brutto = Arbeitsblöcke + Pausenblöcke
+                grossMinutes = workMinutes + pauseMinutes;
             } else {
-                netWorkMinutes = workMinutes;
+                // Ohne manuelle Pausen: Brutto = Arbeitsblöcke (ist schon Brutto)
+                grossMinutes = workMinutes;
             }
+
+            // Netto-Arbeitszeit = Brutto minus Pause
+            var netWorkMinutes = Math.max(0, grossMinutes - pauseMinutes);
 
             // Tagesdifferenz
             var balanceMinutes = 0;
@@ -86,6 +86,7 @@ SH.calculator = {
             }
 
             return {
+                grossMinutes: grossMinutes,
                 workMinutes: workMinutes,
                 pauseMinutes: pauseMinutes,
                 netWorkMinutes: netWorkMinutes,
