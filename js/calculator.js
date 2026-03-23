@@ -56,7 +56,17 @@ SH.calculator = {
             }
 
             // Netto-Arbeitszeit
-            var netWorkMinutes = Math.max(0, workMinutes - pauseMinutes);
+            // Wenn manuelle Pausen existieren, sind die Arbeitsblöcke schon "netto"
+            // (der Timer stoppt den Arbeitsblock bei Pausenstart).
+            // Nur bei Standardpause muss abgezogen werden.
+            var netWorkMinutes;
+            if (standardPauseApplied) {
+                netWorkMinutes = Math.max(0, workMinutes - pauseMinutes);
+            } else if (hasPauseBlocks) {
+                netWorkMinutes = workMinutes;
+            } else {
+                netWorkMinutes = workMinutes;
+            }
 
             // Tagesdifferenz
             var balanceMinutes = 0;

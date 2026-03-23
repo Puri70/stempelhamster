@@ -148,6 +148,11 @@ SH.app = {
             });
         });
 
+        // Korrektur-Button auf Heute-Screen
+        document.getElementById('btn-correct-today').addEventListener('click', function() {
+            SH.navigation.showCorrection(SH.utils.today());
+        });
+
         // === Wochen-Screen ===
         document.getElementById('week-prev').addEventListener('click', function() {
             SH.views.weekPrev();

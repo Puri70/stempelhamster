@@ -233,12 +233,20 @@ SH.timer = {
             var s = elapsed % 60;
 
             if (SH.timer.state === 'working') {
-                // Bei Arbeit: zeige heutige Gesamtarbeitszeit + laufender Block
+                // Bei Arbeit: zeige heutige Gesamtarbeitszeit (alle Blöcke + laufender)
                 SH.calculator.calculateDayTotals(SH.utils.today()).then(function(totals) {
+                    // netWorkMinutes ist auf Minuten gerundet, für flüssige Sekunden
+                    // den laufenden Block sekundengenau einrechnen
                     var totalSec = totals.netWorkMinutes * 60;
+                    // Sekunden des laufenden Blocks hinzufügen (Reststekunden)
+                    if (entry) {
+                        var elapsedSec = Math.floor((Date.now() - entry.startTime) / 1000);
+                        var restSec = elapsedSec % 60;
+                        totalSec += restSec;
+                    }
                     var th = Math.floor(totalSec / 3600);
                     var tm = Math.floor((totalSec % 3600) / 60);
-                    var ts = Math.floor(Date.now() / 1000) % 60;
+                    var ts = totalSec % 60;
                     timerTime.textContent = (th < 10 ? '0' : '') + th + ':' + (tm < 10 ? '0' : '') + tm + ':' + (ts < 10 ? '0' : '') + ts;
                 });
             } else {
